@@ -1,0 +1,33 @@
+---
+title: "Hacer catalogos generales"
+output: html_document
+date: '2022-04-06'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(readxl)
+library(readr)
+library(purrr)
+library(janitor)
+```
+
+```{r}
+map_dfr(
+  .x = excel_sheets("ins/cnsf_val_dg.xlsx"),
+  .f = ~ read_xlsx("ins/cnsf_val_dg.xlsx", sheet = .x) %>% 
+    mutate(riesgo = str_sub(.x, -3, -1), 
+           .before = 1
+           ) %>% 
+    clean_names()
+) %>% 
+  mutate(clean_campo = make_clean_names(campo)) %>% 
+  write_rds("ins/cat_cnsf_dg_base")
+
+
+```
+

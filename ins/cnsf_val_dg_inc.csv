@@ -1,0 +1,30 @@
+﻿No.,Campo,Tipo,Tamaño,Catálogo*
+1,Número de póliza ,Caracter,30,S/C
+2,Clave de la ubicación,Numérico,12,S/C
+3,Número de ubicaciones,Numérico,8,S/C
+4,Tipo de póliza,Caracter,1,259
+5,Fecha de inicio de vigencia,Fecha,8,aaaammdd
+6,Fecha de fin de vigencia,Fecha,8,aaaammdd
+7,Fecha cancelación,Fecha,8,aaaammdd
+8,Moneda,Caracter,2,2.1
+9,Forma de venta,Caracter,2,1
+10,Giro,Caracter,4,4
+11,Entidad/Municipio ,Caracter,5,16.2
+12,Prima emitida,Numérico,14,S/C
+13,Prima retenida ,Numérico,14,S/C
+14,Prima devengada ,Numérico,14,S/C
+15,Comisión directa,Numérico,12,S/C
+16,Valores totales edificio,Numérico,15,S/C
+17,Valores totales contenidos,Numérico,15,S/C
+18,Valores totales existencias,Numérico,15,S/C
+19,Número de niveles,Numérico,2,S/C
+20,Tipo primer riesgo,Caracter,1,7
+21,Límite máximo de responsabilidad,Numérico,15,S/C
+22,Valores totales pérdidas consecuenciales,Numérico,15,S/C
+23,Fecha de emisión,Fecha,8,aaaammdd
+24,Subtipo de seguro,Caracter,1,84
+25,Estatus,Caracter,2,20.1
+26,Prima devengada acumulada,Numérico,14,S/C
+,,,,
+,,,,
+,,,,

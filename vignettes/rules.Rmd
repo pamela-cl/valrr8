@@ -1,0 +1,21 @@
+---
+title: "Nombres de archivos"
+output: html_document
+date: '2022-04-06'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Reglas  
+
+En orden de correr las funciones los nombres de archivos deben cumplir con las siguientes reglas :  
+
+  - Contener en el nombre del archivo (DGE,EMI,SIN) haciendo referencia a 
+    - Datos Generales
+    - Emisión
+    - Siniestros
+  - Contener referencia al ramo al que pertenecen (incendio, terremoto, hidro) 
+  pueden ser mayusculas o minusculas
+  - El ramo deberá estar al final del nombre y deberá tener 3 digitos (dge,DGE,emi,EMI,sin,SIN)
