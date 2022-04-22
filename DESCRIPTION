@@ -1,16 +1,25 @@
 Package: valrr8
-Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Title: Validaciones para el Reporte Regulatorio 8 de la CNSF
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Pamela",
+           family = "Cardenas",
+           role = c("aut", "cre"),
+           email = "pamelacl@ciencias.unam.mx")
+Description: Corre validaciones de estructura y más para los ramos de Incendio, Terremoto e Hidrometereologicos, para Datos Generales, Emisión y Siniestros.
+License: 
+Imports: 
+    config (>= 0.3.1),
+    dplyr,
+    golem (>= 0.3.2),
+    janitor,
+    readr (>= 2.1.2),
+    shiny (>= 1.7.1),
+    shinydashboard
 Encoding: UTF-8
 LazyData: true
-Imports: 
-    dplyr,
-    readr,
-    readxl,
-    stringr
+RoxygenNote: 7.1.1
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

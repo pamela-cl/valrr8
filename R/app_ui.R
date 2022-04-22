@@ -1,0 +1,48 @@
+#' The application User-Interface
+#'
+#' @param request Internal parameter for `{shiny}`.
+#'     DO NOT REMOVE.
+#' @import shiny
+#' @noRd
+app_ui <- function(request) {
+  library(shiny)
+  library(shinydashboard)
+  dashboardPage(
+    skin = "black",
+    dashboardHeader(
+      title = "Validaciones RR8",
+      # Dropdown menu for messages
+      dropdownMenu(type = "message", badgeStatus = "info",
+                   messageItem("git repository",
+                               HTML("You can find the repository of this project here"),
+                               icon = icon("fab fa-github")
+                   ),
+                   icon = icon("fas fa-info-circle")
+      )
+    ),
+    dashboardSidebar(
+      sidebarMenu(
+        menuItem("Archivos", tabName = "upload_files",
+                 icon = icon("fas fa-file-upload")),
+        menuItem("Datos Generales", tabName = "dge",
+                 icon = icon("fas fa-file-alt")),
+        menuItem("Emisión", tabName = "emi",
+                 icon = icon("fas fa-money-check-alt")),
+        menuItem("Siniestros", tabName = "sin",
+                 icon = icon("fas fa-house-damage"))
+      )
+    ),
+    dashboardBody(
+      tabItems(
+        mod_read_files_ui("archivos"),
+        mod_dge_read_files_ui("dge_val_cnsf"),
+        tabItem(tabName = "emi",
+                h2("Validaciones Emisión")
+        ),
+        tabItem(tabName = "sin",
+                h2("Validaciones Siniestros")
+        )
+      )
+    )
+  )
+}
