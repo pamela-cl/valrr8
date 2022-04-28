@@ -25,7 +25,7 @@ map_dfr(
            ) %>% 
     clean_names()
 ) %>% 
-  mutate(clean_campo = make_clean_names(campo)) %>% 
+  mutate(clean_campo = janitor::make_clean_names(campo)) %>% 
   write_rds("ins/cat_cnsf_dg_base")
 
 

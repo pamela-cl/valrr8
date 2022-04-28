@@ -1,7 +1,16 @@
 
 # Apariencia de subida de archivos ----------------------------------------
 
-mod_read_files_ui <- function (id){
+#' Title
+#'
+#' @param id
+#'
+#' @return
+#' @import shinydashboard
+#' @import shiny
+#'
+#' @examples
+mod_upload_files_ui <- function (id){
   ns <- NS(id)
 
   tabItem(tabName = "upload_files",
@@ -69,47 +78,73 @@ mod_read_files_ui <- function (id){
 
 # subir y leer archivos ---------------------------------------------------
 
-mod_read_files_server <- function (id){
+#' Title
+#'
+#' @param id
+#'
+#' @return
+#' @import dplyr
+#'
+#' @examples
+mod_upload_files_server <- function (id){
   moduleServer(
     id,
     ## Below is the module function
     function(input, output, session) {
 
+      tables <- reactiveValues(
+        dge_table = NULL,
+        emi_table = NULL,
+        sin_table = NULL
+      )
+
+      # llamo el catalogo con los tipos de columna y nombres
+      names_cat_dg <-
+        dplyr::mutate(
+          .data = readr::read_rds("inst/catalogos/cat_cnsf_dg_base.rds"),
+          tipo_r  = case_when(
+            tipo == "Caracter" ~ "character",
+            tipo %in% c("Numérico","Numerico") ~ "numeric",
+            tipo == "Fecha" ~ "date",
+            TRUE ~ "checar"
+          )
+        )
+
+
       observeEvent(
         input$files,
+        ignoreNULL = T,
         handlerExpr = {
 
           library(dplyr)
           library(stringr)
 
-          # llamo el catalogo con los tipos de columna y nombres
-          names_cat_dg <-
-            readr::read_rds("inst/catalogos/cat_cnsf_dg_base.rds")
+
 
           # tabla con los nombres de archivos y rutas solo para dge
           tablas_dg <- input$files %>%
-            as_tibble() %>%
-            filter(str_detect(.$name,"dg|DG|DGE|Dge|dge"))
+            tibble::as_tibble() %>%
+            dplyr::filter(str_detect(.$name,"dg|DG|DGE|Dge|dge"))
 
           # extraigo el nombre y año del ejercicio
           tablas_dg <- tablas_dg %>%
-            mutate(ramo = str_to_lower(str_sub(name,-7,-5))) %>%
+            dplyr::mutate(ramo = str_to_lower(str_sub(name,-7,-5))) %>%
             # creo una nueva columna con la informacion de las tablas
-            mutate(data = purrr::map(
+            dplyr::mutate(data = purrr::map(
               .x = datapath,
-              .f = ~ read_delim(
+              .f = ~ readr::read_delim(
                 .x,
                 delim = "|"
               ) %>%
-                select(c(1:(length(.)-1)))
+                dplyr::select(c(1:(length(.)-1)))
             )
             )
 
-          print("tope1__archivos leídos")
+          print("--archivos leídos")
 
           # Ponemos los nombres adecuados a las tablas
           tablas_dg <- tablas_dg %>%
-            mutate(
+            dplyr::mutate(
               data = purrr::map2(
                 .id = NULL,
                 .x = data,
@@ -128,13 +163,49 @@ mod_read_files_server <- function (id){
                                                 colnames(tablas_dg$data[[i]]))
           }
 
-          tabla_gen_dge <- tablas_dg %>% pull(data)
-          setNames(tabla_gen_dge, tablas_dg$ramo)
+          tabla_gen_dge <- tablas_dg %>%
+            dplyr::pull(data)
+          tabla_gen_dge <- setNames(tabla_gen_dge, tablas_dg$ramo)
           rm(tablas_dg)
 
-          print("tope2__comienzan validaciones")
 
-          browser()
+          tables$dge_table <- tabla_gen_dge
+
+          return(tables)
+
+        }
+      )
+
+      observeEvent(
+        tables$dge_table,
+        ignoreNULL = ,
+        handlerExpr = {
+
+          dge_table_val <- tables$dge_table
+
+
+          prueba <- dge_table_val %>%
+            tibble::enframe() %>%
+            mutate(type =
+                     purrr::map2(
+                       .x = value,
+                       .y = name,
+                      .f = ~ sapply(.x,class) %>%
+                        tibble::enframe("clean_campo","tipo_col") %>%
+                        dplyr::left_join(
+                          names_cat_dg %>%
+                            filter(riesgo == .y) %>%
+                            select(clean_campo,tipo_r)
+                        ) %>%
+                        mutate(flag = tipo_col == tipo_r) %>%
+                        count(flag) %>%
+
+                     ))
+
+
+
+
+
 
         }
       )

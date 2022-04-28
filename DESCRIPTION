@@ -7,7 +7,6 @@ Authors@R:
            role = c("aut", "cre"),
            email = "pamelacl@ciencias.unam.mx")
 Description: Corre validaciones de estructura y más para los ramos de Incendio, Terremoto e Hidrometereologicos, para Datos Generales, Emisión y Siniestros.
-License: 
 Imports: 
     config (>= 0.3.1),
     dplyr,
@@ -18,7 +17,7 @@ Imports:
     shinydashboard
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Suggests: 
     knitr,
     rmarkdown

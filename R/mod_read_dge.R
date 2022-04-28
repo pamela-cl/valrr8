@@ -4,7 +4,7 @@
 mod_dge_read_files_ui <- function (id){
   ns <- NS(id)
 
-  tabItem(tabName = "dge",
+  shinydashboard::tabItem(tabName = "dge",
           h2("Validaciones Datos Generales"),
           fluidPage(
             fluidRow(
@@ -26,12 +26,40 @@ mod_dge_read_files_ui <- function (id){
 
 # subir y leer archivos ---------------------------------------------------
 
-mod_dge_read_files_server <- function (id){
+#' Modulo para leer las tablas de Datos generales
+#'
+#' @param id
+#' @param dge_table
+#'
+#' @return
+#' @export
+#'
+#' @examples
+mod_dge_read_files_server <- function (id, dge_table){
   moduleServer(
     id,
     ## Below is the module function
     function(input, output, session) {
 
+      observeEvent(
+        dge_table,
+        ignoreNULL = T,
+        handlerExpr = {
+
+
+
+
+
+
+
+
+
+        }
+      )
+
+      output$output_text <- renderText(
+        print("lib")
+      )
     }
   )
 }

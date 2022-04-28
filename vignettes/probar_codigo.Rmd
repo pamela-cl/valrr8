@@ -1,0 +1,71 @@
+---
+title: "Untitled"
+output: html_document
+date: '2022-04-28'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+ 
+# Create test data.
+data <- data.frame(
+  flag=c("TRUE", "FALSE"),
+  n=c(12, 14)
+)
+```
+
+
+```{r}
+graph_error <- function(data, titles){
+  
+  data <- data %>% 
+    mutate(flag  = case_when(
+      flag == FALSE ~ "Incorrectas",
+      TRUE ~ "Correctos"
+    ))
+  
+  # Compute percentages
+  data$fraction = data$n / sum(data$n)
+  # Compute the cumulative percentages (top of each rectangle)
+  data$ymax = cumsum(data$fraction)
+  # Compute the bottom of each rectangle
+  data$ymin = c(0, head(data$ymax, n=-1))
+  # Compute label position
+  data$labelPosition <- (data$ymax + data$ymin) / 2
+  # Compute a good label
+  data$label <- paste0(data$flag, "\n value: ", data$n)
+  # Make the plot
+  a <- ggplot(data, aes(ymax=ymax, ymin=ymin, xmax=4, xmin=3, fill=flag)) +
+    geom_rect() +
+    coord_polar(theta="y") + # Try to remove that to understand how the chart is built initially
+    xlim(c(2, 4)) +
+    geom_label( x=3.5, aes(y=labelPosition, label=label), size=4) +
+    scale_fill_brewer(
+      palette = 4
+    ) +
+    labs(
+      title = "Número de columnas con el formato incorrecto"
+    )+
+    theme_void()+
+    theme(
+      title = element_text(colour="black", size=12, face="bold"),
+      legend.position = "none"
+      )
+
+    
+  
+  print(a)
+  
+}
+
+graph_error(data,"inc")
+
+```
+```{r}
+theme_void
+```
+

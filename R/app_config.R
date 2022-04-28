@@ -42,3 +42,17 @@ get_golem_config <- function(
     use_parent = use_parent
   )
 }
+
+
+
+#' Function to run the application
+#'
+#' Runs load all, document and run app to avoid running each function.
+#'
+#' @return
+#' @export
+#'
+#' @examples
+fast_test <- function() {
+  rstudioapi::callFun("sendToConsole",'devtools::load_all("."); devtools::document("."); run_app()')
+}

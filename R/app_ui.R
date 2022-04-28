@@ -3,17 +3,17 @@
 #' @param request Internal parameter for `{shiny}`.
 #'     DO NOT REMOVE.
 #' @import shiny
+#' @import shinydashboard
 #' @noRd
 app_ui <- function(request) {
-  library(shiny)
-  library(shinydashboard)
+
   dashboardPage(
     skin = "black",
     dashboardHeader(
       title = "Validaciones RR8",
       # Dropdown menu for messages
       dropdownMenu(type = "message", badgeStatus = "info",
-                   messageItem("git repository",
+                                   messageItem("git repository",
                                HTML("You can find the repository of this project here"),
                                icon = icon("fab fa-github")
                    ),
@@ -34,7 +34,7 @@ app_ui <- function(request) {
     ),
     dashboardBody(
       tabItems(
-        mod_read_files_ui("archivos"),
+        mod_upload_files_ui("archivos"),
         mod_dge_read_files_ui("dge_val_cnsf"),
         tabItem(tabName = "emi",
                 h2("Validaciones Emisión")

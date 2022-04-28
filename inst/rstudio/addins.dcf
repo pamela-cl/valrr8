@@ -1,0 +1,4 @@
+Name: Fast test
+Description: Run load_all, document and run_app all togheter
+Binding: fast_test
+Interactive: false
