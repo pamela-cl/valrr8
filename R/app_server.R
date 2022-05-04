@@ -16,6 +16,8 @@ app_server <- function(input, output, session) {
 
   #  DGE Crear tablas y validaciones de estructura
 
+  mod_dge_read_files_server("dge_val_cnsf", r$from_dge_upload_files)
+
 
 
 }

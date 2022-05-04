@@ -95,7 +95,9 @@ mod_upload_files_server <- function (id){
       tables <- reactiveValues(
         dge_table = NULL,
         emi_table = NULL,
-        sin_table = NULL
+        sin_table = NULL,
+        empieza = 0,
+        graphs = 0
       )
 
       # llamo el catalogo con los tipos de columna y nombres
@@ -111,6 +113,8 @@ mod_upload_files_server <- function (id){
         )
 
 
+
+
       observeEvent(
         input$files,
         ignoreNULL = T,
@@ -119,96 +123,86 @@ mod_upload_files_server <- function (id){
           library(dplyr)
           library(stringr)
 
+          tables$empieza <- 0
 
+          file <- input$files
+          ext <- tools::file_ext(file$datapath)
 
-          # tabla con los nombres de archivos y rutas solo para dge
-          tablas_dg <- input$files %>%
-            tibble::as_tibble() %>%
-            dplyr::filter(str_detect(.$name,"dg|DG|DGE|Dge|dge"))
-
-          # extraigo el nombre y año del ejercicio
-          tablas_dg <- tablas_dg %>%
-            dplyr::mutate(ramo = str_to_lower(str_sub(name,-7,-5))) %>%
-            # creo una nueva columna con la informacion de las tablas
-            dplyr::mutate(data = purrr::map(
-              .x = datapath,
-              .f = ~ readr::read_delim(
-                .x,
-                delim = "|"
-              ) %>%
-                dplyr::select(c(1:(length(.)-1)))
-            )
-            )
-
-          print("--archivos leídos")
-
-          # Ponemos los nombres adecuados a las tablas
-          tablas_dg <- tablas_dg %>%
-            dplyr::mutate(
-              data = purrr::map2(
-                .id = NULL,
-                .x = data,
-                .y = ramo,
-                .f = ~ setNames(.x,
-                                names_cat_dg %>%
-                                  filter(riesgo == .y) %>%
-                                  pull(clean_campo)
-                )
-              )
-            )
-
-          # quitamos el sufijo creado por el map
-          for(i in c(1:3)){
-          colnames(tablas_dg$data[[i]]) <- gsub("\\_[0-9]","",
-                                                colnames(tablas_dg$data[[i]]))
+          if( sum(str_detect(ext,"txt")) == length(ext)){
+            tables$empieza <- 1
+          }else{
+            tables$empieza <- 0
           }
 
-          tabla_gen_dge <- tablas_dg %>%
-            dplyr::pull(data)
-          tabla_gen_dge <- setNames(tabla_gen_dge, tablas_dg$ramo)
-          rm(tablas_dg)
+          if(tables$empieza == 1){
+            # tabla con los nombres de archivos y rutas solo para dge
+            tablas_dg <- input$files %>%
+              tibble::as_tibble() %>%
+              dplyr::filter(str_detect(.$name,"dg|DG|DGE|Dge|dge"))
+
+            # extraigo el nombre y año del ejercicio
+            tablas_dg <- tablas_dg %>%
+              dplyr::mutate(ramo = str_to_lower(str_sub(name,-7,-5))) %>%
+              # creo una nueva columna con la informacion de las tablas
+              dplyr::mutate(data = purrr::map(
+                .x = datapath,
+                .f = ~ readr::read_delim(
+                  .x,
+                  delim = "|"
+                ) %>%
+                  dplyr::select(c(1:(length(.)-1)))
+              )
+              )
+
+            print("--archivos leídos")
+
+            # Ponemos los nombres adecuados a las tablas
+            tablas_dg <- tablas_dg %>%
+              dplyr::mutate(
+                data = purrr::map2(
+                  .id = NULL,
+                  .x = data,
+                  .y = ramo,
+                  .f = ~ setNames(.x,
+                                  names_cat_dg %>%
+                                    filter(riesgo == .y) %>%
+                                    pull(clean_campo)
+                  )
+                )
+              )
+
+            # quitamos el sufijo creado por el map
+            for(i in c(1:3)){
+              colnames(tablas_dg$data[[i]]) <- gsub("\\_[0-9]","",
+                                                    colnames(tablas_dg$data[[i]]))
+            }
+
+            print("--armado de la tabla dge_inc")
+
+            tabla_gen_dge <- tablas_dg %>%
+              dplyr::pull(data)
+            tabla_gen_dge <- setNames(tabla_gen_dge, tablas_dg$ramo)
+            rm(tablas_dg)
 
 
-          tables$dge_table <- tabla_gen_dge
+            tables$dge_table <- tabla_gen_dge
 
-          return(tables)
+            return(tables)
+
+          }else{
+
+            shinyalert::shinyalert("Oops!", "Archivos con formato incorrecto", type = "error")
+            # showNotification("Archivos con formato incorrecto.",
+            #                  type = "error")
+
+
+          }
 
         }
       )
 
-      observeEvent(
-        tables$dge_table,
-        ignoreNULL = ,
-        handlerExpr = {
-
-          dge_table_val <- tables$dge_table
 
 
-          prueba <- dge_table_val %>%
-            tibble::enframe() %>%
-            mutate(type =
-                     purrr::map2(
-                       .x = value,
-                       .y = name,
-                      .f = ~ sapply(.x,class) %>%
-                        tibble::enframe("clean_campo","tipo_col") %>%
-                        dplyr::left_join(
-                          names_cat_dg %>%
-                            filter(riesgo == .y) %>%
-                            select(clean_campo,tipo_r)
-                        ) %>%
-                        mutate(flag = tipo_col == tipo_r) %>%
-                        count(flag) %>%
-
-                     ))
-
-
-
-
-
-
-        }
-      )
 
       # Imprimo tabla de resultados, validar que sean txt
 
@@ -218,9 +212,11 @@ mod_upload_files_server <- function (id){
         ext <- tools::file_ext(file$datapath)
         req(file)
         validate(need( sum(str_detect(ext,"txt")) == length(ext),
-                       "Please upload only txt files")
+                       "Seleciona solo archivos en formato txt")
         )
+
       })
+
     }
   )
 }
