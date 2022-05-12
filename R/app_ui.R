@@ -4,13 +4,22 @@
 #'     DO NOT REMOVE.
 #' @import shiny
 #' @import shinydashboard
+#' @import dashboardthemes
 #' @noRd
 app_ui <- function(request) {
 
+
+
+
   dashboardPage(
-    skin = "black",
     dashboardHeader(
-      title = "Validaciones RR8",
+      title = dashboardthemes::shinyDashboardLogo(
+        theme = "blue_gradient",
+        boldText = "Validaciones RR8",
+        mainText = "",
+        badgeText = "App"
+
+      ),
       # Dropdown menu for messages
       dropdownMenu(type = "message", badgeStatus = "info",
                                    messageItem("git repository",
@@ -29,10 +38,15 @@ app_ui <- function(request) {
         menuItem("Emisión", tabName = "emi",
                  icon = icon("fas fa-money-check-alt")),
         menuItem("Siniestros", tabName = "sin",
-                 icon = icon("fas fa-house-damage"))
+                 icon = icon("fas fa-house-damage")),
+        actionButton("browser","Browser")
       )
     ),
     dashboardBody(
+      # dashboardthemes::shinyDashboardThemes(
+      #   theme = "blue_gradient"
+      # ),
+      costumeTheme(),
       tabItems(
         mod_upload_files_ui("archivos"),
         mod_dge_read_files_ui("dge_val_cnsf"),

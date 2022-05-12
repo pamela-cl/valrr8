@@ -14,7 +14,7 @@ mod_upload_files_ui <- function (id){
   ns <- NS(id)
 
   tabItem(tabName = "upload_files",
-          h2("Sube tus archivos"),
+          h2("Como subir tus archivos"),
           tags$head(
             tags$style(HTML("
               .shiny-output-error-validation {
@@ -27,14 +27,7 @@ mod_upload_files_ui <- function (id){
               column(
                 12,
                 "",
-                box(
-                  title = "Instrucciones",
-                  width = 12,
-                  status = "warning",
-                  solidHeader = TRUE,
-                  collapsible = TRUE,
-                  collapsed = TRUE,
-                  HTML("<p>Sube los archivos que quieras validar que pertenezcan a los ramos de Incendio, Terremoto o Riesgos hidrometeorológicos.</p>
+                HTML("<p>Sube los archivos que quieras validar que pertenezcan a los ramos de Incendio, Terremoto o Riesgos hidrometeorológicos.</p>
                   <p> En orden de correr las funciones los nombres de archivos deben cumplir con las siguientes reglas : <br>
 
                   <ul class='roman'>
@@ -57,8 +50,7 @@ mod_upload_files_ui <- function (id){
                     <li>dge_22_inc</li>
                     <li>SIN_21_TEV *</li>
                   </ul>
-                  <b> * opción recomendada</b>")
-                ),
+                  <b> * opción recomendada</b>"),
                 box(
                   width = 12,
                   status = "warning", solidHeader = TRUE, collapsible = TRUE,
@@ -100,21 +92,6 @@ mod_upload_files_server <- function (id){
         graphs = 0
       )
 
-      # llamo el catalogo con los tipos de columna y nombres
-      names_cat_dg <-
-        dplyr::mutate(
-          .data = readr::read_rds("inst/catalogos/cat_cnsf_dg_base.rds"),
-          tipo_r  = case_when(
-            tipo == "Caracter" ~ "character",
-            tipo %in% c("Numérico","Numerico") ~ "numeric",
-            tipo == "Fecha" ~ "date",
-            TRUE ~ "checar"
-          )
-        )
-
-
-
-
       observeEvent(
         input$files,
         ignoreNULL = T,
@@ -135,59 +112,44 @@ mod_upload_files_server <- function (id){
           }
 
           if(tables$empieza == 1){
-            # tabla con los nombres de archivos y rutas solo para dge
-            tablas_dg <- input$files %>%
-              tibble::as_tibble() %>%
-              dplyr::filter(str_detect(.$name,"dg|DG|DGE|Dge|dge"))
 
-            # extraigo el nombre y año del ejercicio
-            tablas_dg <- tablas_dg %>%
-              dplyr::mutate(ramo = str_to_lower(str_sub(name,-7,-5))) %>%
-              # creo una nueva columna con la informacion de las tablas
-              dplyr::mutate(data = purrr::map(
-                .x = datapath,
-                .f = ~ readr::read_delim(
-                  .x,
-                  delim = "|"
-                ) %>%
-                  dplyr::select(c(1:(length(.)-1)))
-              )
-              )
+            # Enseñar el progreso al usuario
+            withProgress({
 
-            print("--archivos leídos")
+              # tabla con los nombres de archivos y rutas
+              tablas <- input$files %>%
+                tibble::as_tibble()
 
-            # Ponemos los nombres adecuados a las tablas
-            tablas_dg <- tablas_dg %>%
-              dplyr::mutate(
-                data = purrr::map2(
-                  .id = NULL,
-                  .x = data,
-                  .y = ramo,
-                  .f = ~ setNames(.x,
-                                  names_cat_dg %>%
-                                    filter(riesgo == .y) %>%
-                                    pull(clean_campo)
-                  )
-                )
-              )
+              print("Cargamos datos")
 
-            # quitamos el sufijo creado por el map
-            for(i in c(1:3)){
-              colnames(tablas_dg$data[[i]]) <- gsub("\\_[0-9]","",
-                                                    colnames(tablas_dg$data[[i]]))
-            }
+              # Hacemos una tabla para cada tipo de archivo
+              tablas_dge_fun <- filtrar_tabla(tablas,"dg|DG|DGE|Dge|dge")
+              tablas_emi_fun <- filtrar_tabla(tablas,"emi|EMI|Emi|emisión|emision")
+              tablas_sin_fun <- filtrar_tabla(tablas,"sin|SIN|Sin|siniestros|Siniestros")
 
-            print("--armado de la tabla dge_inc")
+              browser()
+              # quitamos el sufijo creado por el map
 
-            tabla_gen_dge <- tablas_dg %>%
-              dplyr::pull(data)
-            tabla_gen_dge <- setNames(tabla_gen_dge, tablas_dg$ramo)
-            rm(tablas_dg)
+              for(i in c(1:3)){
+                colnames(tablas_dge_fun$data[[i]]) <- gsub("\\_[0-9]","",
+                                                           colnames(tablas_dge_fun$data[[i]]))
+              }
+
+              print("--armado de la tablas")
+
+              tabla_gen_dge <- tablas_dg %>%
+                dplyr::pull(data)
+              tabla_gen_dge <- setNames(tabla_gen_dge, tablas_dg$ramo)
+              rm(tablas_dg)
 
 
-            tables$dge_table <- tabla_gen_dge
+              tables$dge_table <- tabla_gen_dge
 
-            return(tables)
+
+
+            },
+            message = "validando formatos de archivos")
+
 
           }else{
 
@@ -195,9 +157,7 @@ mod_upload_files_server <- function (id){
             # showNotification("Archivos con formato incorrecto.",
             #                  type = "error")
 
-
           }
-
         }
       )
 
@@ -216,6 +176,13 @@ mod_upload_files_server <- function (id){
         )
 
       })
+
+      return(
+        list(
+          dge_tabla = reactive({tables$dge_table}),
+          boton_archivos = reactive({input$files})
+        )
+      )
 
     }
   )

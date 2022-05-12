@@ -4,13 +4,10 @@
 \alias{mod_dge_read_files_server}
 \title{Modulo para leer las tablas de Datos generales}
 \usage{
-mod_dge_read_files_server(id, dge_table)
+mod_dge_read_files_server(id, boton, dge_table)
 }
 \arguments{
 \item{dge_table}{}
-}
-\value{
-
 }
 \description{
 Modulo para leer las tablas de Datos generales

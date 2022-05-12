@@ -4,7 +4,7 @@
 \alias{graph_error}
 \title{GGplot formato erroneo}
 \usage{
-graph_error(data, titles)
+graph_error(data)
 }
 \arguments{
 \item{data}{tabla con el numero de columnas correctas e incorrectas}

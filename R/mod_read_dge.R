@@ -5,21 +5,35 @@ mod_dge_read_files_ui <- function (id){
   ns <- NS(id)
 
   shinydashboard::tabItem(tabName = "dge",
-          h2("Validaciones Datos Generales"),
-          fluidPage(
-            fluidRow(
-              column(
-                12,
-                "",
-                box(
-                  "Validaciones de estructura",
-                  width = 12,
-                  status = "warning", solidHeader = TRUE, collapsible = TRUE,
-                  textOutput(ns("output_text"))
-                )
-              ),
-            )
-          )
+                          h2("Validaciones Datos Generales"),
+                          fluidPage(
+                            fluidRow(
+                              tabBox(
+                                width = 12,
+                                fluidRow(
+                                  box(
+                                    width = 12,
+                                    status = "warning",
+                                    solidHeader = TRUE,
+                                    collapsible = TRUE,
+                                    title = "Validaciones de formato",
+                                    column(
+                                      12,
+                                      plotOutput(ns("plot_dge")),
+                                      br(),
+                                      actionButton(ns("detalles"),"Detalles"),
+                                      br(),
+                                      conditionalPanel( condition = "input$detalles %% 2 == 1",
+                                                        br(),
+                                                        DT::DTOutput(ns("detalles"))
+                                                        )
+
+                                    )
+                                  )
+                                )
+                              )
+                            )
+                          )
   )
 }
 
@@ -31,33 +45,36 @@ mod_dge_read_files_ui <- function (id){
 #' @param id
 #' @param dge_table
 #'
-#' @return
+#' @import tidyr
+#' @import dplyr
 #' @export
 #'
 #' @examples
-mod_dge_read_files_server <- function (id, dge_table){
+mod_dge_read_files_server <- function (id, boton, dge_table){
   moduleServer(
     id,
     ## Below is the module function
     function(input, output, session) {
 
       tables <- reactiveValues(
-        graphs = 0
+        graphs = 0,
+        datos = 0,
+        detalles = NULL
       )
 
       # Empiezan las validaciones
 
       observeEvent(
-        dge_table,
+        boton(),
         ignoreNULL = T,
         handlerExpr = {
 
-          dge_table_val <- dge_table
 
+          # llamamos la tabla de datos generales
 
-        browser()
+          dge_table_val <- dge_table()
 
-
+          # vamos a comprobar que las columnas tengan el formato correcto
 
           prueba <- dge_table_val %>%
             tibble::enframe() %>%
@@ -69,45 +86,82 @@ mod_dge_read_files_server <- function (id, dge_table){
                          tibble::enframe("clean_campo","tipo_col") %>%
                          dplyr::left_join(
                            names_cat_dg %>%
-                             filter(riesgo == .y) %>%
-                             select(clean_campo,tipo_r)
+                             dplyr::filter(riesgo == .y) %>%
+                             dplyr::select(clean_campo,tipo_r)
                          ) %>%
-                         mutate(flag = tipo_col == tipo_r)
+                         dplyr::mutate(flag = tipo_col == tipo_r)
 
                      ))
+          print("Se corrieron validaciones de formato")
 
-          graphs <- purrr::map2(
-            .x = prueba$type,
-            .y = prueba$name,
-            .f = ~ .x %>%
-              count(flag) %>%
-              graph_error(.y)
-          )
+          # Hacemos una tabla con los errores
 
-          tables$graphs <- graphs
+          errores_dge <- prueba %>%
+            select(-value) %>%
+            tidyr::unnest(type) %>%
+            group_by(name,flag) %>%
+            count()
+
+          # hacemos la gráfica
+          print("se hace gráfica")
+          errores_dge <- graph_error(errores_dge)
 
 
+          # guardamos para el plot output
+          tables$graphs <- errores_dge
+          tables$datos <- prueba
 
         }
       )
 
-      output$output_text <- renderText(
-        print("lib")
+      observeEvent(
+        input$detalles,
+        ignoreNULL = T,
+        handlerExpr = {
+          if(input$detalles %% 2 == 1){
+          detalles <- tables$datos %>%
+            select(-value) %>%
+            tidyr::unnest(type) %>%
+            mutate(
+              name = recode(name,
+                            "inc" = "Incendio",
+                            "rhi" = "Riesgos Hidro",
+                            "tev" = "Terremoto")
+            )
+          colnames(detalles) <- c("Riesgo","Columna","Formato","Formato_Cat","Igual")
+
+          tables$detalles <- detalles
+          }else{
+            tables$detalles <- NULL
+          }
+
+        }
       )
+
+
 
       # Graficas formato de columnas
 
-      output$plot_dge_inc <- renderPlot({
-        tables$graphs[1]
+      output$plot_dge <- renderPlot({
+        tables$graphs
       })
 
-      output$plot_dge_rhi <- renderPlot({
-        tables$graphs[2]
-      })
+      output$detalles <- DT::renderDT(
+        tables$detalles,
+        # column filter on the top
+        extensions = 'Buttons',
+        escape = FALSE,
+        selection = 'multiple',
+        server = FALSE,
+        options = list(
+          scrollX=TRUE,
+          scrollCollapse=TRUE
+        ),
+        filter = 'top',rownames= FALSE
+      )
+      outputOptions(output, "detalles", suspendWhenHidden = FALSE)
 
-      output$plot_dge_tev <- renderPlot({
-        tables$graphs[3]
-      })
+
     }
   )
 }
