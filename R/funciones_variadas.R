@@ -274,3 +274,16 @@ customTheme_teal <- function()
 )
 }
 
+#' Poner el nombre del ramo a cada elemento de la lista
+#'
+#' @param data
+#'
+#' @import dplyr
+#' @import stats
+#'
+#' @examples
+list_names <- function(data) {
+  data %>%
+  dplyr::pull(data) %>%
+    stats::setNames(data$ramo)
+}
