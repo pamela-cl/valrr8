@@ -8,7 +8,7 @@
 #' @noRd
 app_ui <- function(request) {
 
-
+read_global_file()
 
 
   dashboardPage(
