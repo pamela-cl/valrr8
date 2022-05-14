@@ -123,32 +123,31 @@ mod_upload_files_server <- function (id){
               print("Cargamos datos")
 
               # Hacemos una tabla para cada tipo de archivo
-              tablas_dge_fun <- filtrar_tabla(tablas,"dg|DG|DGE|Dge|dge")
-              tablas_emi_fun <- filtrar_tabla(tablas,"emi|EMI|Emi|emisión|emision")
-              tablas_sin_fun <- filtrar_tabla(tablas,"sin|SIN|Sin|siniestros|Siniestros")
+              tablas_dge <- filtrar_tabla(tablas,"dg|DG|DGE|Dge|dge")
+              tablas_emi <- filtrar_tabla(tablas,"emi|EMI|Emi|emisión|emision")
+              tablas_sin <- filtrar_tabla(tablas,"sin|SIN|Sin|siniestros|Siniestros")
 
-              browser()
-              # quitamos el sufijo creado por el map
-
-              for(i in c(1:3)){
-                colnames(tablas_dge_fun$data[[i]]) <- gsub("\\_[0-9]","",
-                                                           colnames(tablas_dge_fun$data[[i]]))
-              }
+              # # quitamos el sufijo creado por el map
+              #
+              # for(i in c(1:3)){
+              #   colnames(tablas_dge_fun$data[[i]]) <- gsub("\\_[0-9]","",
+              #                                              colnames(tablas_dge_fun$data[[i]]))
+              # }
 
               print("--armado de la tablas")
 
-              tabla_gen_dge <- tablas_dg %>%
-                dplyr::pull(data)
-              tabla_gen_dge <- setNames(tabla_gen_dge, tablas_dg$ramo)
-              rm(tablas_dg)
-
+              tabla_gen_dge <- list_names(tablas_dge)
+              tabla_gen_emi <- list_names(tablas_emi)
+              tabla_gen_sin <- list_names(tablas_sin)
 
               tables$dge_table <- tabla_gen_dge
+              tables$emi_table <- tabla_gen_emi
+              tables$sin_table <- tabla_gen_sin
 
 
 
             },
-            message = "validando formatos de archivos")
+            message = "Creando tablas de DGE, EMI y SIN")
 
 
           }else{
@@ -156,7 +155,6 @@ mod_upload_files_server <- function (id){
             shinyalert::shinyalert("Oops!", "Archivos con formato incorrecto", type = "error")
             # showNotification("Archivos con formato incorrecto.",
             #                  type = "error")
-
           }
         }
       )
@@ -180,6 +178,8 @@ mod_upload_files_server <- function (id){
       return(
         list(
           dge_tabla = reactive({tables$dge_table}),
+          emi_tabla = reactive({tables$emi_table}),
+          sin_tabla = reactive({tables$sin_table}),
           boton_archivos = reactive({input$files})
         )
       )
