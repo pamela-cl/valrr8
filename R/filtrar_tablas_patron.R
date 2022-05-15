@@ -8,7 +8,6 @@
 #' @import stringr
 #' @import purrr
 #'
-#' @examples
 filtrar_tabla <- function(tabla, pattern){
   to_return <- tabla %>%
     dplyr::filter(stringr::str_detect(.$name,{{pattern}})) %>%
@@ -17,10 +16,10 @@ filtrar_tabla <- function(tabla, pattern){
     # creo una nueva columna con la informacion de las tablas
     dplyr::mutate(data = purrr::map(
       .x = datapath,
-      .f = ~ readr::read_delim(
+      .f = ~ suppressMessages(readr::read_delim(
         .x,
         delim = "|"
-      ) %>%
+      )) %>%
         dplyr::select(c(1:(length(.)-1)))
     )
     ) %>%
@@ -32,8 +31,8 @@ filtrar_tabla <- function(tabla, pattern){
         .y = ramo,
         .f = ~ setNames(.x,
                         names_cat_dg %>%
-                          filter(riesgo == .y) %>%
-                          pull(clean_campo)
+                          dplyr::filter(riesgo == .y) %>%
+                          dplyr::pull(clean_campo)
         )
       )
     )

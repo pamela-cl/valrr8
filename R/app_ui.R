@@ -8,7 +8,7 @@
 #' @noRd
 app_ui <- function(request) {
 
-read_global_file()
+  read_global_file()
 
 
   dashboardPage(
@@ -22,7 +22,7 @@ read_global_file()
       ),
       # Dropdown menu for messages
       dropdownMenu(type = "message", badgeStatus = "info",
-                                   messageItem("git repository",
+                   messageItem("git repository",
                                HTML("You can find the repository of this project here"),
                                icon = icon("fab fa-github")
                    ),
@@ -46,7 +46,7 @@ read_global_file()
       # dashboardthemes::shinyDashboardThemes(
       #   theme = "blue_gradient"
       # ),
-      costumeTheme(),
+      customTheme_teal(),
       tabItems(
         mod_upload_files_ui("archivos"),
         mod_dge_read_files_ui("dge_val_cnsf"),

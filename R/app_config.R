@@ -52,7 +52,6 @@ get_golem_config <- function(
 #' @return
 #' @export
 #'
-#' @examples
 fast_test <- function() {
   rstudioapi::callFun("sendToConsole",'devtools::load_all("."); devtools::document("."); run_app()')
 }

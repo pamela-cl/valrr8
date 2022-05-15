@@ -9,7 +9,6 @@
 #' @import shinydashboard
 #' @import shiny
 #'
-#' @examples
 mod_upload_files_ui <- function (id){
   ns <- NS(id)
 
@@ -27,7 +26,13 @@ mod_upload_files_ui <- function (id){
               column(
                 12,
                 "",
-                HTML("<p>Sube los archivos que quieras validar que pertenezcan a los ramos de Incendio, Terremoto o Riesgos hidrometeorológicos.</p>
+                box(
+                  width = 12,
+                  status = "warning",
+                  solidHeader = TRUE,
+                  collapsible = TRUE,
+                  collapsed = T,
+                  HTML("<p>Sube los archivos que quieras validar que pertenezcan a los ramos de Incendio, Terremoto o Riesgos hidrometeorológicos.</p>
                   <p> En orden de correr las funciones los nombres de archivos deben cumplir con las siguientes reglas : <br>
 
                   <ul class='roman'>
@@ -50,17 +55,20 @@ mod_upload_files_ui <- function (id){
                     <li>dge_22_inc</li>
                     <li>SIN_21_TEV *</li>
                   </ul>
-                  <b> * opción recomendada</b>"),
+                  <b> * opción recomendada</b>"))),
+              column(
+                width = 12,
                 box(
                   width = 12,
-                  status = "warning", solidHeader = TRUE, collapsible = TRUE,
+                  title = "Selecciona tus archivos",
+                  background = "teal",
+                  collapsible = TRUE,
                   fileInput(ns("files"),
-                            "Selecciona tus archivos",
+                            "",
                             multiple = T,
                             accept = ".csv"
                   ),
-                  textOutput(ns("contents"))
-                )
+                  textOutput(ns("contents")))
               )
             )
           )
@@ -77,7 +85,6 @@ mod_upload_files_ui <- function (id){
 #' @return
 #' @import dplyr
 #'
-#' @examples
 mod_upload_files_server <- function (id){
   moduleServer(
     id,
@@ -120,9 +127,11 @@ mod_upload_files_server <- function (id){
               tablas <- input$files %>%
                 tibble::as_tibble()
 
-              print("Cargamos datos")
+              print("Formamos tablas")
 
               # Hacemos una tabla para cada tipo de archivo
+
+
               tablas_dge <- filtrar_tabla(tablas,"dg|DG|DGE|Dge|dge")
               tablas_emi <- filtrar_tabla(tablas,"emi|EMI|Emi|emisión|emision")
               tablas_sin <- filtrar_tabla(tablas,"sin|SIN|Sin|siniestros|Siniestros")
@@ -134,8 +143,6 @@ mod_upload_files_server <- function (id){
               #                                              colnames(tablas_dge_fun$data[[i]]))
               # }
 
-              print("--armado de la tablas")
-
               tabla_gen_dge <- list_names(tablas_dge)
               tabla_gen_emi <- list_names(tablas_emi)
               tabla_gen_sin <- list_names(tablas_sin)
@@ -143,8 +150,6 @@ mod_upload_files_server <- function (id){
               tables$dge_table <- tabla_gen_dge
               tables$emi_table <- tabla_gen_emi
               tables$sin_table <- tabla_gen_sin
-
-
 
             },
             message = "Creando tablas de DGE, EMI y SIN")
@@ -180,7 +185,10 @@ mod_upload_files_server <- function (id){
           dge_tabla = reactive({tables$dge_table}),
           emi_tabla = reactive({tables$emi_table}),
           sin_tabla = reactive({tables$sin_table}),
-          boton_archivos = reactive({input$files})
+          boton_archivos = reactive({input$files}),
+          inc_val = reactive({input$inc_val}),
+          rhi_val = reactive({input$rhi_val}),
+          tev_val = reactive({input$tev_val})
         )
       )
 
